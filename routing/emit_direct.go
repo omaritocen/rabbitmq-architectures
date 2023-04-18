@@ -2,17 +2,17 @@ package main
 
 import (
 	"context"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 	"os"
 	"rabbitmqhello/utils"
 	"time"
-
-	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 /*
-This Model deals with a single emitter and multiple workers
-on a single queue using the default exchange
+go run emit_direct.go "Hello Info" info
+go run emit_direct.go "Hello warning" warning
+go run emit_direct.go "Hello error" error
 */
 func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
@@ -23,31 +23,31 @@ func main() {
 	utils.FailOnError(err, "Failed to Open a channel")
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
-		"task_queue",
+	err = ch.ExchangeDeclare(
+		"logs_direct",
+		"direct",
 		true,
 		false,
 		false,
 		false,
 		nil,
 	)
-	utils.FailOnError(err, "Failed to declare a queue")
+	utils.FailOnError(err, "Failed to declare an exchange")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	body := utils.BodyFrom(os.Args)
-	err = ch.PublishWithContext(
-		ctx,
-		"",
-		q.Name,
+
+	err = ch.PublishWithContext(ctx,
+		"logs_direct",
+		utils.SeverityFrom(os.Args),
 		false,
 		false,
 		amqp.Publishing{
-			DeliveryMode: amqp.Persistent,
-			ContentType:  "text/plain",
-			Body:         []byte(body),
+			ContentType: "text/plain",
+			Body:        []byte(body),
 		})
-	utils.FailOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", body)
+
+	log.Printf(" [x] Sent %s", body)
 }

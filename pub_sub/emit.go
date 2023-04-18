@@ -10,6 +10,10 @@ import (
 	"rabbitmqhello/utils"
 )
 
+/*
+This Model deals with a publish-subscribe pattern
+on a queue for each worker with fanout exchange
+*/
 func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672")
 	utils.FailOnError(err, "Failed to connect to RabbitMQ")

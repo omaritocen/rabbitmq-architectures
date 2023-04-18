@@ -3,7 +3,6 @@ package utils
 import (
 	"log"
 	"os"
-	"strings"
 )
 
 func FailOnError(err error, msg string) {
@@ -17,8 +16,18 @@ func BodyFrom(args []string) string {
 	if (len(args) < 2) || os.Args[1] == "" {
 		s = "hello"
 	} else {
-		s = strings.Join(args[1:], " ")
+		s = args[1]
 	}
 
+	return s
+}
+
+func SeverityFrom(args []string) string {
+	var s string
+	if (len(args) < 3) || os.Args[2] == "" {
+		s = "info"
+	} else {
+		s = os.Args[2]
+	}
 	return s
 }
