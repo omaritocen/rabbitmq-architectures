@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"rabbitmqhello/utils"
-	"strings"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -33,7 +32,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	body := bodyFrom(os.Args)
+	body := utils.BodyFrom(os.Args)
 	err = ch.PublishWithContext(
 		ctx,
 		"",
@@ -47,15 +46,4 @@ func main() {
 		})
 	utils.FailOnError(err, "Failed to publish a message")
 	log.Printf(" [x] Sent %s\n", body)
-}
-
-func bodyFrom(args []string) string {
-	var s string
-	if (len(args) < 2) || os.Args[1] == "" {
-		s = "hello"
-	} else {
-		s = strings.Join(args[1:], " ")
-	}
-
-	return s
 }
